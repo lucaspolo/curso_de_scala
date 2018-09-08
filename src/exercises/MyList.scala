@@ -1,6 +1,6 @@
 package exercises
 
-abstract class MyList {
+abstract class MyList[+A] {
   /*
     head = First element
     tail = remainder of the list
@@ -10,36 +10,36 @@ abstract class MyList {
     toString => a string represation
    */
 
-  def head: Int
-  def tail: MyList
+  def head: A
+  def tail: MyList[A]
   def isEmpty: Boolean
-  def add(element: Int): MyList
+  def add[B >: A](element: B): MyList[B]
   def printElements: String
   override def toString: String = "[" + printElements + "]"
 }
 
-object Empty extends MyList {
+object Empty extends MyList[Nothing] {
 
-  override def head: Int = throw new NoSuchElementException
+  override def head: Nothing = throw new NoSuchElementException
 
-  override def tail: MyList = throw new NoSuchElementException
+  override def tail: MyList[Nothing] = throw new NoSuchElementException
 
   override def isEmpty: Boolean = true
 
-  override def add(element: Int): MyList = new Cons(element, Empty)
+  override def add[B >: Nothing](element: B): MyList[B] = new Cons(element, Empty)
 
   override def printElements: String = ""
 
 }
 
-class Cons(h: Int, t: MyList = Empty) extends MyList {
-  override def head: Int = h
+class Cons[+A](h: A, t: MyList[A] = Empty) extends MyList[A] {
+  override def head: A = h
 
-  override def tail: MyList = t
+  override def tail: MyList[A] = t
 
   override def isEmpty: Boolean = false
 
-  override def add(element: Int): MyList = new Cons(element, this)
+  override def add[B >: A](element: B): MyList[B] = new Cons(element, this)
 
   override def printElements: String =
     if(t.isEmpty) "" + h
@@ -47,10 +47,8 @@ class Cons(h: Int, t: MyList = Empty) extends MyList {
 }
 
 object ListTest extends App {
-  val list = new Cons(1, new Cons(2, new Cons(3)))
-  println(list.head)
-  println(list.add(4).head)
-
-  // polymorphic call
-  println(list)
+  val listOfIntegers: MyList[Int] = new Cons(1, new Cons(2, new Cons(3)))
+  println(listOfIntegers)
+  println(listOfIntegers.add("Oloco"))
+  val listOfStrings: MyList[String] = Empty
 }
