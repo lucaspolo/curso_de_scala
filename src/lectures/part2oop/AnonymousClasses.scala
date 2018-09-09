@@ -28,4 +28,5 @@ object AnonymousClasses extends App {
   jim sayHi
 
   println(jim.getClass)
+
 }
