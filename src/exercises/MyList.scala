@@ -22,6 +22,12 @@ abstract class MyList[+A] {
   def filter(predicate: A => Boolean): MyList[A]
 
   def ++[B >: A](list: MyList[B]): MyList[B]
+
+  // High order functions
+  def foreach(f: (A) => Unit): Unit
+  def sort(comparsion: (A, A) => Int): MyList[A]
+  def zipwith[B, C](list: MyList[B], zip: (A, B) => C): MyList[C]
+  def fold[B](start: B)(operator: (B, A) => B): B
 }
 
 case object Empty extends MyList[Nothing] {
@@ -43,6 +49,16 @@ case object Empty extends MyList[Nothing] {
   override def flatMap[B](transformer: Nothing => MyList[B]): MyList[B] = Empty
 
   override def ++[B >: Nothing](list: MyList[B]): MyList[B] = list
+
+  override def foreach(f: Nothing => Unit): Unit = ()
+
+  override def sort(comparsion: (Nothing, Nothing) => Int): MyList[Nothing] = Empty
+
+  override def zipwith[B, C](list: MyList[B], zip: (Nothing, B) => C): MyList[C] =
+    if (!list.isEmpty) throw new RuntimeException("List do not have same length")
+    else Empty
+
+  override def fold[B](start: B)(operator: (B, Nothing) => B): B = start
 }
 
 case class Cons[+A](h: A, t: MyList[A] = Empty) extends MyList[A] {
@@ -69,6 +85,30 @@ case class Cons[+A](h: A, t: MyList[A] = Empty) extends MyList[A] {
     transformer(h) ++ t.flatMap(transformer)
 
   override def ++[B >: A](list: MyList[B]): MyList[B] = new Cons(h, t ++ list)
+
+  override def foreach(f: A => Unit): Unit = {
+    f(head)
+    tail.foreach(f)
+  }
+
+  override def sort(compare: (A, A) => Int): MyList[A] = {
+
+    def insert(x: A, sortedList: MyList[A]): MyList[A] =
+      if (sortedList.isEmpty) new Cons(x, Empty)
+      else if (compare(x, sortedList.head) < 0 ) new Cons(x, sortedList)
+      else new Cons(sortedList.head, insert(x, sortedList.tail))
+
+    val sortedTail = t.sort(compare)
+    insert(h, sortedTail)
+  }
+
+  override def zipwith[B, C](list: MyList[B], zip: (A, B) => C): MyList[C] = {
+    if (list.isEmpty) throw new RuntimeException("Lists do not have the same length")
+    else new Cons(zip(h, list.head), tail.zipwith(list.tail, zip))
+  }
+
+  override def fold[B](start: B)(operator: (B, A) => B): B =
+    t.fold(operator(start, h))(operator)
 }
 
 
@@ -103,4 +143,12 @@ object ListTest extends App {
   println(newList)
 
   println(cloneOfListOfIntegers == listOfIntegers)
+
+  listOfIntegers.foreach(println)
+
+  listOfIntegers.sort((x, y) => y - x).foreach(println)
+
+  listOfIntegers.zipwith[Int, Int](cloneOfListOfIntegers, _ + _).foreach(println)
+
+  println(listOfIntegers.fold(0)(_ + _))
 }
