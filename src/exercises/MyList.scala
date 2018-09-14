@@ -85,29 +85,21 @@ case class Cons[+A](h: A, t: MyList[A] = Empty) extends MyList[A] {
  */
 
 object ListTest extends App {
-  val listOfIntegers: MyList[Integer] = new Cons(1, new Cons(2, new Cons(3)))
+  val listOfIntegers: MyList[Int] = new Cons(1, new Cons(2, new Cons(3)))
   val cloneOfListOfIntegers = new Cons(1, new Cons(2, new Cons(3)))
   println(listOfIntegers)
   println(listOfIntegers.add("Oloco"))
   val listOfStrings: MyList[String] = Empty
 
-  var newList = listOfIntegers.map(new Function1[Integer, Integer] {
-    override def apply(element: Integer): Integer = {
-      element * element
-    }
-  })
+  var newList = listOfIntegers.map(_ * 2)
 
   println(newList)
 
-  newList = listOfIntegers.filter(new Function1[Integer, Boolean] {
-    override def apply(element: Integer): Boolean = element % 2 == 1
-  })
+  newList = listOfIntegers.filter(_ % 2 == 1)
 
   println(newList)
 
-  newList = listOfIntegers.flatMap(new Function1[Integer, MyList[Integer]] {
-    override def apply(element: Integer): MyList[Integer] = new Cons(element, new Cons(element + 1))
-  })
+  newList = listOfIntegers.flatMap(elem => new Cons(elem, new Cons(elem + 1)))
   println(newList)
 
   println(cloneOfListOfIntegers == listOfIntegers)
